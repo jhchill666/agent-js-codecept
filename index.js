@@ -135,7 +135,7 @@ module.exports = (config) => {
       if (step) {
         const screenshot = await attachScreenshot();
   
-        resp = await rpClient.sendLog(step.tempId, {
+        await rpClient.sendLog(step.tempId, {
           level: 'INFO',
           message: 'some message',
           time: step.startTime,
