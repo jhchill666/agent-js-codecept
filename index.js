@@ -131,7 +131,19 @@ module.exports = (config) => {
   });
 
   event.dispatcher.on(event.step.after, (step) => {
-    recorder.add(() => finishStep(step));
+    recorder.add(async () => {
+      if (step) {
+        const screenshot = await attachScreenshot();
+  
+        resp = await rpClient.sendLog(step.tempId, {
+          level: 'INFO',
+          message: 'some message',
+          time: step.startTime,
+        }, screenshot).promise;
+      }
+      
+      return finishStep(step)
+    });
   });
 
   event.dispatcher.on(event.step.failed, async (step) => {
@@ -139,15 +151,6 @@ module.exports = (config) => {
       if (metaStep) metaStep.status = 'failed';
     }
     if (step && step.tempId) failedStep = { ...step };
-    if (step) {
-      const screenshot = await attachScreenshot();
-
-      resp = await rpClient.sendLog(step.tempId, {
-        level: 'INFO',
-        message: 'some message',
-        time: step.startTime,
-      }, screenshot).promise;
-    }
   });
 
   event.dispatcher.on(event.step.passed, (step, err) => {
